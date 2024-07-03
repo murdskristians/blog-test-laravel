@@ -1,20 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\BlogPostController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\CategoryController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('Welcome');
 });
 
 Route::get('/dashboard', function () {
@@ -27,13 +17,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Blog posts routes
-Route::resource('blog_posts', BlogPostController::class)->middleware(['auth', 'verified']);
+// New routes for BlogPosts and Categories
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/blog_posts', function () {
+        return Inertia::render('BlogPosts');
+    })->name('blog_posts.index');
 
-// Comments routes
-Route::resource('comments', CommentController::class)->only(['store', 'destroy'])->middleware(['auth', 'verified']);
+    Route::get('/categories', function () {
+        return Inertia::render('Categories');
+    })->name('categories.index');
+});
 
-// Categories routes
-Route::resource('categories', CategoryController::class)->middleware(['auth', 'verified']);
+Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
+    Route::resource('blog_posts', BlogPostController::class)->except(['create', 'edit']);
+    Route::post('blog_posts/{post}/comments', [CommentController::class, 'store']);
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
+    Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
+});
 
 require __DIR__.'/auth.php';
+

@@ -4,65 +4,57 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class BlogPostController extends Controller
 {
     public function index()
     {
-        $blogPosts = BlogPost::all();
-        return view('blog_posts.index', compact('blogPosts'));
-    }
-
-    public function create()
-    {
-        return view('blog_posts.create');
+        $posts = BlogPost::with(['user', 'comments.user'])->get();
+        return response()->json($posts);
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'content' => 'required|string',
         ]);
 
-        $blogPost = new BlogPost([
-            'title' => $request->title,
-            'body' => $request->body,
-            'user_id' => Auth::id(),
-        ]);
+        $post = new BlogPost();
+        $post->title = $request->input('title');
+        $post->content = $request->input('content');
+        $post->user_id = auth()->id();
+        $post->save();
 
-        $blogPost->save();
-
-        return redirect()->route('blog_posts.index')->with('success', 'Blog post created successfully.');
+        return response()->json($post, 201);
     }
 
-    public function show(BlogPost $blogPost)
+    public function show($id)
     {
-        return view('blog_posts.show', compact('blogPost'));
+        $post = BlogPost::with(['user', 'comments.user'])->findOrFail($id);
+        return response()->json($post);
     }
 
-    public function edit(BlogPost $blogPost)
-    {
-        return view('blog_posts.edit', compact('blogPost'));
-    }
-
-    public function update(Request $request, BlogPost $blogPost)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'content' => 'required|string',
         ]);
 
-        $blogPost->update($request->all());
+        $post = BlogPost::findOrFail($id);
+        $post->title = $request->input('title');
+        $post->content = $request->input('content');
+        $post->save();
 
-        return redirect()->route('blog_posts.index')->with('success', 'Blog post updated successfully.');
+        return response()->json($post);
     }
 
-    public function destroy(BlogPost $blogPost)
+    public function destroy($id)
     {
-        $blogPost->delete();
+        $post = BlogPost::findOrFail($id);
+        $post->delete();
 
-        return redirect()->route('blog_posts.index')->with('success', 'Blog post deleted successfully.');
+        return response()->json(null, 204);
     }
 }
