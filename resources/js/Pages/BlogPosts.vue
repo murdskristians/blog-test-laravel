@@ -26,61 +26,73 @@
   </template>
 
   <script>
-  import axios from 'axios';
+import axios from '../requests';
 
-  export default {
+export default {
     data() {
-      return {
-        blogPosts: [],
-        newPost: {
-          title: '',
-          body: ''
-        },
-        newComment: ''
-      };
+        return {
+            posts: [],
+            newPost: {
+                title: '',
+                content: ''
+            },
+            newComment: ''
+        };
     },
     methods: {
-      fetchBlogPosts() {
-        axios.get('/api/blog_posts')
-          .then(response => {
-            this.blogPosts = response.data;
-          });
-      },
-      createPost() {
-        axios.post('/api/blog_posts', this.newPost)
-          .then(() => {
-            this.fetchBlogPosts();
-            this.newPost.title = '';
-            this.newPost.body = '';
-          });
-      },
-      editPost(postId) {
-        // Implement edit post logic
-      },
-      deletePost(postId) {
-        axios.delete(`/api/blog_posts/${postId}`)
-          .then(() => {
-            this.fetchBlogPosts();
-          });
-      },
-      addComment(postId) {
-        axios.post(`/api/blog_posts/${postId}/comments`, { content: this.newComment })
-          .then(() => {
-            this.fetchBlogPosts();
-            this.newComment = '';
-          });
-      },
-      deleteComment(commentId) {
-        axios.delete(`/api/comments/${commentId}`)
-          .then(() => {
-            this.fetchBlogPosts();
-          });
-      }
+        fetchBlogPosts() {
+            axios.get('/blog_posts')
+                .then(response => {
+                    this.posts = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching blog posts:', error);
+                });
+        },
+        deletePost(postId) {
+            axios.delete(`/blog_posts/${postId}`)
+                .then(() => {
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error deleting post:', error);
+                });
+        },
+        addComment(postId) {
+            axios.post(`/blog_posts/${postId}/comments`, { content: this.newComment })
+                .then(() => {
+                    this.fetchBlogPosts();
+                    this.newComment = '';
+                })
+                .catch(error => {
+                    console.error('Error adding comment:', error);
+                });
+        },
+        deleteComment(commentId) {
+            axios.delete(`/comments/${commentId}`)
+                .then(() => {
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error deleting comment:', error);
+                });
+        },
+        createPost() {
+            axios.post('/blog_posts', this.newPost)
+                .then(() => {
+                    this.newPost.title = '';
+                    this.newPost.content = '';
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error creating post:', error);
+                });
+        }
     },
     mounted() {
-      this.fetchBlogPosts();
+        this.fetchBlogPosts();
     }
-  };
+};
   </script>
 
   <style>
