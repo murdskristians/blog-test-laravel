@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\CategoryController;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -18,7 +19,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// New routes for BlogPosts and Categories
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/blog_posts', function () {
         return Inertia::render('BlogPosts');
@@ -37,3 +37,4 @@ Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

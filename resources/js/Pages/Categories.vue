@@ -1,19 +1,30 @@
 <template>
     <div class="container">
-        <h1 class="title">Categories</h1>
-        <ul class="category-list">
-            <li v-for="category in categories" :key="category.id" class="category-item">
-                <span v-if="editingCategoryId !== category.id">{{ category.name }}</span>
-                <input v-else v-model="editingCategoryName" class="input" />
-                <button v-if="editingCategoryId !== category.id" @click="startEditing(category)" class="button">Edit</button>
-                <button v-else @click="updateCategory(category.id)" class="button">Save</button>
-            </li>
-        </ul>
-        <form @submit.prevent="createCategory" class="category-form">
-            <input v-model="newCategory.name" placeholder="Category Name" class="input" />
-            <button type="submit" class="button">Create Category</button>
-        </form>
-        <button class="back-button" @click="goBack">Back to Dashboard</button>
+        <div class="header">
+            <h1 class="title">Categories</h1>
+            <button class="back-button" @click="goBack">Back to Dashboard</button>
+        </div>
+        <div class="categories-grid">
+            <ul class="category-list">
+                <li v-for="category in categories" :key="category.id" class="category-item">
+                    <div class="category-name">
+                        <span v-if="editingCategoryId !== category.id">{{ category.name }}</span>
+                        <input v-else v-model="editingCategoryName" class="input" />
+                    </div>
+                    <div class="category-actions">
+                        <button v-if="editingCategoryId !== category.id" @click="startEditing(category)" class="button">Edit</button>
+                        <button v-else @click="updateCategory(category.id)" class="button">Save</button>
+                        <button @click="deleteCategory(category.id)" class="button delete-button">Delete</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="category-form-container">
+                <form @submit.prevent="createCategory" class="category-form">
+                    <input v-model="newCategory.name" placeholder="Category Name" class="input" />
+                    <button type="submit" class="button">Create Category</button>
+                </form>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -51,6 +62,11 @@ export default {
             fetchCategories();
         };
 
+        const deleteCategory = async (categoryId) => {
+            await axios.delete(`/api/categories/${categoryId}`);
+            fetchCategories();
+        };
+
         const goBack = () => {
             window.history.back();
         };
@@ -65,6 +81,7 @@ export default {
             editingCategoryName,
             startEditing,
             updateCategory,
+            deleteCategory,
             goBack,
         };
     },
@@ -73,7 +90,7 @@ export default {
 
 <style scoped>
 .container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f9f9f9;
@@ -81,11 +98,22 @@ export default {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .title {
     font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
     font-weight: bold;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .category-list {
@@ -105,13 +133,28 @@ export default {
     border-bottom: none;
 }
 
+.category-name {
+    flex: 1;
+}
+
+.category-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.category-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .category-form {
-    margin-top: 20px;
+    width: 100%;
 }
 
 .input {
     display: block;
-    width: calc(100% - 100px);
+    width: 100%;
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
@@ -128,15 +171,22 @@ export default {
     text-align: center;
     font-size: 14px;
     transition: background-color 0.3s;
-    margin-left: 10px;
 }
 
 .button:hover {
     background-color: #4b5563;
 }
 
+.delete-button {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+.delete-button:hover {
+    background-color: #b91c1c;
+}
+
 .back-button {
-    margin-top: 20px;
     background-color: #1f2937;
     color: #ffffff;
     padding: 10px 20px;
