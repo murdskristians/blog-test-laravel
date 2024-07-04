@@ -32,4 +32,17 @@ class CommentController extends Controller
 
         return response()->json(null, 204);
     }
+    
+    public function update(Request $request, Comment $comment)
+    {
+        $this->authorize('update', $comment);
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:255',
+        ]);
+
+        $comment->update($validated);
+
+        return response()->json(['message' => 'Comment updated successfully']);
+    }
 }

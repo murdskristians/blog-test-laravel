@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -35,6 +36,8 @@ Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
     Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
     Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
 });
+
+Route::put('/comments/{comment}', [CommentController::class, 'update']);
 
 require __DIR__.'/auth.php';
 
