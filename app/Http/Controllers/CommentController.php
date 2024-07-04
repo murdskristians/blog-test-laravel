@@ -32,9 +32,10 @@ class CommentController extends Controller
 
         return response()->json(null, 204);
     }
-    
-    public function update(Request $request, Comment $comment)
+
+    public function update(Request $request, $id)
     {
+        $comment = Comment::findOrFail($id);
         $this->authorize('update', $comment);
 
         $validated = $request->validate([
@@ -43,6 +44,6 @@ class CommentController extends Controller
 
         $comment->update($validated);
 
-        return response()->json(['message' => 'Comment updated successfully']);
+        return response()->json($comment);
     }
 }

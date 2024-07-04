@@ -50,11 +50,15 @@ class BlogPostController extends Controller
         return response()->json($post);
     }
 
-    public function destroy($id)
+    public function destroy(BlogPost $blogPost)
     {
-        $post = BlogPost::findOrFail($id);
-        $post->delete();
+        // Delete comments associated with the blog post
+        $blogPost->comments()->delete();
 
-        return response()->json(null, 204);
+        // Delete the blog post itself
+        $blogPost->delete();
+
+        return response()->json(['message' => 'Blog post deleted successfully']);
     }
+
 }

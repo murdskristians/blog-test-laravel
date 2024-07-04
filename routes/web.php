@@ -39,5 +39,10 @@ Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
 
 Route::put('/comments/{comment}', [CommentController::class, 'update']);
 
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('comments', CommentController::class);
+});
+
+Route::delete('/blog_posts/{id}', [BlogPostController::class, 'destroy']);
 require __DIR__.'/auth.php';
 
