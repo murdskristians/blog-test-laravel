@@ -9,20 +9,22 @@ class BlogPost extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'body', 'user_id'];
+    protected $fillable = [
+        'title', 'content', 'user_id', 'category_id',
+    ];
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'post_id');
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function comments()
+    public function category()
     {
-        return $this->hasMany(Comment::class);
-    }
-
-    public function categories()
-    {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsTo(Category::class);
     }
 }

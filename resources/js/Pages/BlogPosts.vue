@@ -1,11 +1,14 @@
 <template>
     <div class="container">
+
       <h1 class="title">Blog Posts</h1>
+
       <div class="form-container">
         <input v-model="newTitle" placeholder="Title" class="input" />
         <textarea v-model="newContent" placeholder="Body" class="textarea"></textarea>
         <button @click="addPost" class="button">Create Post</button>
       </div>
+
       <div v-for="post in blogPosts" :key="post.id" class="post">
         <h2 class="post-title">{{ post.title }}</h2>
         <p class="post-content">{{ post.content }}</p>
@@ -21,7 +24,9 @@
           <button @click="addComment(post.id)" class="button">Add Comment</button>
         </div>
       </div>
+
       <button @click="$router.push('/dashboard')" class="button back-button">Back to Dashboard</button>
+
     </div>
   </template>
 
