@@ -10,12 +10,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return view('categories.index', compact('categories'));
-    }
-
-    public function create()
-    {
-        return view('categories.create');
+        return response()->json($categories);
     }
 
     public function store(Request $request)
@@ -24,23 +19,14 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $category = new Category([
-            'name' => $request->name,
-        ]);
+        $category = Category::create($request->only('name'));
 
-        $category->save();
-
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+        return response()->json($category, 201);
     }
 
     public function show(Category $category)
     {
-        return view('categories.show', compact('category'));
-    }
-
-    public function edit(Category $category)
-    {
-        return view('categories.edit', compact('category'));
+        return response()->json($category);
     }
 
     public function update(Request $request, Category $category)
@@ -49,15 +35,15 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $category->update($request->all());
+        $category->update($request->only('name'));
 
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        return response()->json($category);
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
 
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        return response()->json(null, 204);
     }
 }
