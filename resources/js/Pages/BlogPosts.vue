@@ -97,7 +97,6 @@ axios.defaults.baseURL = 'http://127.0.0.1:8000';  // Change this to your Larave
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
 
-
 export default {
     data() {
         return {
@@ -116,7 +115,7 @@ export default {
         };
     },
     methods: {
-            searchBlogPosts() {
+        searchBlogPosts() {
             if (this.searchKeyword.trim() === '') {
                 this.fetchBlogPosts();
                 return;
