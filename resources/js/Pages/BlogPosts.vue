@@ -2,7 +2,9 @@
     <div class="container">
         <div class="back-button-container">
             <button @click="goBack" class="back-button">Back to Dashboard</button>
+            <a data-v-8e8f4dea="" class="button" href="/categories">Categories</a>
         </div>
+
         <h1 class="title">Blog Posts</h1>
         <div class="columns">
             <div class="column is-three-quarters">
@@ -301,5 +303,20 @@ button:hover {
 
 .blog-post_delete-button{
     margin: 0 0 30px 0;
+}
+
+.button {
+    background-color: #1f2937;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #4b5563;
 }
 </style>

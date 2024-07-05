@@ -3,6 +3,7 @@
         <div class="header">
             <h1 class="title">Categories</h1>
             <button class="back-button" @click="goBack">Back to Dashboard</button>
+            <a data-v-8e8f4dea="" class="button" href="/blog_posts">Blog Posts</a>
         </div>
         <div class="categories-grid">
             <ul class="category-list">
