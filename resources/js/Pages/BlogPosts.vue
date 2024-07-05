@@ -10,11 +10,8 @@
                     <h2>{{ post.title }}</h2>
                     <p>{{ post.content }}</p>
                     <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                    <div v-if="post.categories.length" class="blog_post_categories">
-                        <strong>Categories: </strong>
-                        <span v-for="category in post.categories" :key="category.id">{{ category.name }}, </span>
-                    </div>
-                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button blog-post_delete-button">Delete</button>
+                    <div>Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
+                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
                         <div v-if="comment.editing">
                             <input v-model="comment.content" />
@@ -38,7 +35,23 @@
                 <form @submit.prevent="createPost">
                     <input v-model="newPost.title" placeholder="Title" />
                     <textarea v-model="newPost.content" placeholder="Body"></textarea>
-                    <button type="submit">Create Post</button>
+                    <div>
+                        <label>Select Categories: </label>
+                        <select v-model="selectedCategory" @change="addCategory" class="blog-post_category_selector">
+                            <option value="" disabled selected>Select category</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="blog-post_create-post-btn">Create Post</button>
+                    <div v-if="newPost.categories.length">
+                        <h3>Selected Categories:</h3>
+                        <ul>
+                            <li class="blog-post_selected_category" v-for="category in newPost.categories" :key="category.id">
+                                {{ category.name }}
+                                <button class="blog-post_selected_category_delete_btn" type="button" @click="removeCategory(category.id)">Remove</button>
+                            </li>
+                        </ul>
+                    </div>
                 </form>
             </div>
         </div>
@@ -52,9 +65,12 @@ export default {
     data() {
         return {
             blogPosts: [],
+            categories: [],
+            selectedCategory: null, // To hold the selected category before adding it
             newPost: {
                 title: '',
-                content: ''
+                content: '',
+                categories: [] // Initialize as an empty array
             },
             newComment: '',
             user: {
@@ -80,11 +96,27 @@ export default {
                     console.error('Error fetching blog posts:', error);
                 });
         },
+        fetchCategories() {
+            axios.get('/categories')
+                .then(response => {
+                    this.categories = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+        },
         createPost() {
-            axios.post('/blog_posts', this.newPost)
+            const newPostData = {
+                ...this.newPost,
+                category_ids: this.newPost.categories.map(c => c.id) // Extract only the IDs of the categories
+            };
+
+            axios.post('/blog_posts', newPostData)
                 .then(() => {
                     this.newPost.title = '';
                     this.newPost.content = '';
+                    this.newPost.categories = [];
+                    this.selectedCategory = null;
                     this.fetchBlogPosts();
                 })
                 .catch(error => {
@@ -134,10 +166,20 @@ export default {
         },
         goBack() {
             this.$inertia.get('/dashboard');
+        },
+        addCategory() {
+            const category = this.categories.find(cat => cat.id === this.selectedCategory);
+            if (category && !this.newPost.categories.find(cat => cat.id === category.id)) {
+                this.newPost.categories.push(category);
+            }
+        },
+        removeCategory(categoryId) {
+            this.newPost.categories = this.newPost.categories.filter(cat => cat.id !== categoryId);
         }
     },
     mounted() {
         this.fetchBlogPosts();
+        this.fetchCategories(); // Fetch categories when component is mounted
     }
 };
 </script>
