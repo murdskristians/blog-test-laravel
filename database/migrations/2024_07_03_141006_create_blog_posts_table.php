@@ -18,7 +18,6 @@ class CreateBlogPostsTable extends Migration
             $table->string('title');
             $table->text('content'); // Ensure this column exists
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

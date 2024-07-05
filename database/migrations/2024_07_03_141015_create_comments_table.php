@@ -6,13 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCommentsTable extends Migration
 {
-    public function up()
-    {
+    public function up() {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->text('content');
-            $table->foreignId('post_id')->constrained('blog_posts');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('blog_post_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,3 +21,4 @@ class CreateCommentsTable extends Migration
         Schema::dropIfExists('comments');
     }
 }
+

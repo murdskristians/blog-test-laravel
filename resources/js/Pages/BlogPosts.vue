@@ -110,7 +110,7 @@ export default {
             comment.editing = true;
         },
         updateComment(comment) {
-            console.log('Updating comment:', comment); // Add this line to debug
+            // console.log('Updating comment:', comment); 
             axios.put(`/comments/${comment.id}`, { content: comment.content })
                 .then(() => {
                     comment.editing = false;
