@@ -56,11 +56,15 @@ class BlogPostController extends Controller
         return response()->json($blogPost);
     }
 
-    public function destroy(BlogPost $blogPost)
+    public function destroy($id)
     {
-        $this->authorize('delete', $blogPost);
-        $blogPost->delete();
+        $post = BlogPost::findOrFail($id);
 
-        return response()->json(null, 204);
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $post->delete();
+        return response()->json(['success' => true]);
     }
 }
