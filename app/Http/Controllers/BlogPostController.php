@@ -38,13 +38,18 @@ class BlogPostController extends Controller
     {
         $post = BlogPost::findOrFail($id);
 
-        if ($post->user_id !== auth()->id()) {
+        if ($post->user_id != auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $post->update($request->only('title', 'content', 'categories'));
+        $post->update($request->only('title', 'content'));
 
-        return response()->json(['message' => 'Post updated successfully', 'post' => $post]);
+        // Update categories
+        if ($request->has('categories')) {
+            $post->categories()->sync($request->categories);
+        }
+
+        return response()->json(['message' => 'Post updated successfully', 'post' => $post->load('categories')]);
     }
 
     public function destroy(BlogPost $blogPost)

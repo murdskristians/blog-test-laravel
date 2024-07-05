@@ -195,7 +195,7 @@ export default {
             const updatedPostData = {
                 title: post.title,
                 content: post.content,
-                categories: post.categories.map(c => c.id)
+                categories: post.categories.map(c => c.id) // Include category IDs
             };
 
             axios.put(`/api/blog_posts/${post.id}`, updatedPostData)
