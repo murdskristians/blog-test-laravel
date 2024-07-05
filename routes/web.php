@@ -38,7 +38,8 @@ Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
 });
 
-Route::put('/comments/{comment}', [CommentController::class, 'update']);
+// Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+Route::put('/api/comments/{id}', [CommentController::class, 'update']);
 
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('comments', CommentController::class);

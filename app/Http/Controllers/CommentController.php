@@ -35,15 +35,14 @@ class CommentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $comment = Comment::findOrFail($id);
-        $this->authorize('update', $comment);
-
-        $validated = $request->validate([
-            'content' => 'required|string|max:255',
+        $request->validate([
+            'content' => 'required|string',
         ]);
 
-        $comment->update($validated);
+        $comment = Comment::findOrFail($id);
+        $comment->content = $request->input('content');
+        $comment->save();
 
-        return response()->json($comment);
+        return response()->json($comment, 200);
     }
 }

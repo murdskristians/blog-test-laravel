@@ -66,7 +66,7 @@ export default {
                         post.comments = post.comments.map(comment => {
                             return {
                                 ...comment,
-                                editing: false
+                                editing: false // Add the editing property
                             };
                         });
                         return post;
@@ -110,6 +110,7 @@ export default {
             comment.editing = true;
         },
         updateComment(comment) {
+            console.log('Updating comment:', comment); // Add this line to debug
             axios.put(`/comments/${comment.id}`, { content: comment.content })
                 .then(() => {
                     comment.editing = false;
