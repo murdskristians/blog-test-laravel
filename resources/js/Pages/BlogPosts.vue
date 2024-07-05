@@ -9,11 +9,37 @@
         <div class="columns">
             <div class="column is-three-quarters">
                 <div v-for="post in blogPosts" :key="post.id" class="post">
-                    <h2>{{ post.title }}</h2>
-                    <p>{{ post.content }}</p>
-                    <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                    <div class="blog-post_categories">Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
-                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
+                    <div v-if="post.editing">
+                        <input v-model="post.title" />
+                        <textarea v-model="post.content"></textarea>
+                        <div>
+                            <label>Select Categories: </label>
+                            <select v-model="post.selectedCategory" @change="addCategoryToPost(post)" class="blog-post_category_selector">
+                                <option value="" disabled selected>Select category</option>
+                                <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                            </select>
+                        </div>
+                        <button @click="updatePost(post)" class="save-button">Save</button>
+                        <button @click="cancelEdit(post)" class="cancel-button">Cancel</button>
+                        <div v-if="post.categories.length">
+                            <h3>Selected Categories:</h3>
+                            <ul>
+                                <li class="blog-post_selected_category" v-for="category in post.categories" :key="category.id">
+                                    {{ category.name }}
+                                    <button class="blog-post_selected_category_delete_btn" type="button" @click="removeCategoryFromPost(post, category.id)">Remove</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <h2>{{ post.title }}</h2>
+                        <p>{{ post.content }}</p>
+                        <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
+                        <div class="blog-post_categories">Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
+                        <button v-if="post.user.id === user.id" @click="startEdit(post)" class="edit-button">Edit</button>
+                        <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
+                    </div>
+
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
                         <div v-if="comment.editing">
                             <input v-model="comment.content" />
@@ -72,155 +98,185 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('met
 export default {
     data() {
         return {
-        blogPosts: [],
-        categories: [],
-        selectedCategory: null,
-        newPost: {
-            title: '',
-            content: '',
-            categories: [] // Initialize as an empty array
-        },
-        user: {
-            id: null
-        }
+            blogPosts: [],
+            categories: [],
+            selectedCategory: null,
+            newPost: {
+                title: '',
+                content: '',
+                categories: [] // Initialize as an empty array
+            },
+            user: {
+                id: null
+            }
         };
     },
     methods: {
-    async fetchUser() {
-        try {
-            const response = await axios.get('/api/user');
-            this.user.id = response.data.id;
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-        }
-    },
-    fetchBlogPosts() {
-    axios.get('/api/blog_posts')
-        .then(response => {
-            // Assuming response.data is an array of blog posts
-            if (Array.isArray(response.data)) {
-                this.blogPosts = response.data.map(post => {
-                    post.comments = post.comments.map(comment => {
-                        return {
-                            ...comment,
-                            editing: false // Add the editing property
-                        };
-                    });
-                    post.newComment = ''; // Add a newComment property to each post
-                    return post;
-                }).reverse(); // Reverse the order of the posts
-            } else {
-                console.error('Unexpected response structure:', response.data);
+        async fetchUser() {
+            try {
+                const response = await axios.get('/api/user');
+                this.user.id = response.data.id;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
             }
-        })
-        .catch(error => {
-            console.error('Error fetching blog posts:', error);
-        });
-}
-,
-    fetchCategories() {
-        axios.get('/api/categories')
-            .then(response => {
-                this.categories = response.data;
-            })
-            .catch(error => {
-                console.error('Error fetching categories:', error);
-            });
-    },
-    createPost() {
-        const newPostData = {
-            title: this.newPost.title,
-            content: this.newPost.content,
-            categories: this.newPost.categories.map(c => c.id),
-            user_id: this.user.id // Ensure user_id is included
-        };
+        },
+        fetchBlogPosts() {
+            axios.get('/api/blog_posts')
+                .then(response => {
+                    if (Array.isArray(response.data)) {
+                        this.blogPosts = response.data.map(post => {
+                            post.comments = post.comments.map(comment => {
+                                return {
+                                    ...comment,
+                                    editing: false // Add the editing property
+                                };
+                            });
+                            post.newComment = ''; // Add a newComment property to each post
+                            post.editing = false; // Add the editing property for posts
+                            return post;
+                        }).reverse(); // Reverse the order of the posts
+                    } else {
+                        console.error('Unexpected response structure:', response.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching blog posts:', error);
+                });
+        },
+        fetchCategories() {
+            axios.get('/api/categories')
+                .then(response => {
+                    this.categories = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+        },
+        createPost() {
+            const newPostData = {
+                title: this.newPost.title,
+                content: this.newPost.content,
+                categories: this.newPost.categories.map(c => c.id),
+                user_id: this.user.id // Ensure user_id is included
+            };
 
-        console.log('Payload:', newPostData); // Log the payload for debugging
+            console.log('Payload:', newPostData); // Log the payload for debugging
 
-        axios.post('/api/blog_posts', newPostData)
-            .then(() => {
-                this.newPost.title = '';
-                this.newPost.content = '';
-                this.newPost.categories = [];
-                this.selectedCategory = null;
-                this.fetchBlogPosts();
-            })
-            .catch(error => {
-                console.error('Error creating post:', error);
-            });
-    },
-    deletePost(postId) {
-        axios.delete(`/api/blog_posts/${postId}`)
-            .then(() => {
-                this.fetchBlogPosts();
-            })
-            .catch(error => {
-                console.error('Error deleting post:', error);
-            });
-    },
-    addComment(postId) {
-        const post = this.blogPosts.find(p => p.id === postId);
-
-        if (post.newComment.trim() !== '') {
-            axios.post(`/api/blog_posts/${postId}/comments`, { content: post.newComment })
+            axios.post('/api/blog_posts', newPostData)
                 .then(() => {
-                    post.newComment = '';
+                    this.newPost.title = '';
+                    this.newPost.content = '';
+                    this.newPost.categories = [];
+                    this.selectedCategory = null;
                     this.fetchBlogPosts();
                 })
                 .catch(error => {
-                    console.error('Error adding comment:', error);
+                    console.error('Error creating post:', error);
                 });
-        }
-    },
-    editComment(comment) {
-        comment.editing = true;
-    },
-    updateComment(comment) {
-        axios.put(`/comments/${comment.id}`, { content: comment.content })
-            .then(() => {
-                comment.editing = false;
-                this.fetchBlogPosts();
-            })
-            .catch(error => {
-                console.error('Error updating comment:', error);
-            });
-    },
-    deleteComment(commentId) {
-        axios.delete(`/comments/${commentId}`)
-            .then(() => {
-                this.fetchBlogPosts();
-            })
-            .catch(error => {
-                console.error('Error deleting comment:', error);
-            });
-    },
-    goBack() {
-        this.$inertia.get('/dashboard');
-    },
-    addCategory() {
-        const category = this.categories.find(cat => cat.id === this.selectedCategory);
-        if (category && !this.newPost.categories.find(cat => cat.id === category.id)) {
-            this.newPost.categories.push(category);
-        }
-    },
-    removeCategory(categoryId) {
-        this.newPost.categories = this.newPost.categories.filter(cat => cat.id !== categoryId);
-    }
-},
-created() {
-    this.fetchUser().then(() => {
-        console.log(this.user);
-        console.log(this.user.id);
-    });
-},
-mounted() {
-    this.fetchBlogPosts();
-    this.fetchCategories(); // Fetch categories when component is mounted
-}
+        },
+        deletePost(postId) {
+            axios.delete(`/api/blog_posts/${postId}`)
+                .then(() => {
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error deleting post:', error);
+                });
+        },
+        startEdit(post) {
+            post.editing = true;
+            post.selectedCategory = null;
+        },
+        cancelEdit(post) {
+            post.editing = false;
+            this.fetchBlogPosts();
+        },
+        updatePost(post) {
+            const updatedPostData = {
+                title: post.title,
+                content: post.content,
+                categories: post.categories.map(c => c.id)
+            };
 
+            axios.put(`/api/blog_posts/${post.id}`, updatedPostData)
+                .then(() => {
+                    post.editing = false;
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error updating post:', error);
+                });
+        },
+        addCategoryToPost(post) {
+            const category = this.categories.find(cat => cat.id === post.selectedCategory);
+            if (category && !post.categories.find(cat => cat.id === category.id)) {
+                post.categories.push(category);
+            }
+        },
+        removeCategoryFromPost(post, categoryId) {
+            post.categories = post.categories.filter(cat => cat.id !== categoryId);
+        },
+        addComment(postId) {
+            const post = this.blogPosts.find(p => p.id === postId);
+
+            if (post.newComment.trim() !== '') {
+                axios.post(`/api/blog_posts/${postId}/comments`, { content: post.newComment })
+                    .then(() => {
+                        post.newComment = '';
+                        this.fetchBlogPosts();
+                    })
+                    .catch(error => {
+                        console.error('Error adding comment:', error);
+                    });
+            }
+        },
+        editComment(comment) {
+            comment.editing = true;
+        },
+        updateComment(comment) {
+            axios.put(`/api/comments/${comment.id}`, { content: comment.content })
+                .then(() => {
+                    comment.editing = false;
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error updating comment:', error);
+                });
+        },
+        deleteComment(commentId) {
+            axios.delete(`/api/comments/${commentId}`)
+                .then(() => {
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error deleting comment:', error);
+                });
+        },
+        goBack() {
+            this.$inertia.get('/dashboard');
+        },
+        addCategory() {
+            const category = this.categories.find(cat => cat.id === this.selectedCategory);
+            if (category && !this.newPost.categories.find(cat => cat.id === category.id)) {
+                this.newPost.categories.push(category);
+            }
+        },
+        removeCategory(categoryId) {
+            this.newPost.categories = this.newPost.categories.filter(cat => cat.id !== categoryId);
+        }
+    },
+    created() {
+        this.fetchUser().then(() => {
+            console.log(this.user);
+            console.log(this.user.id);
+        });
+    },
+    mounted() {
+        this.fetchBlogPosts();
+        this.fetchCategories(); // Fetch categories when component is mounted
+    }
 };
 </script>
-
 
 <style scoped>
 .container {

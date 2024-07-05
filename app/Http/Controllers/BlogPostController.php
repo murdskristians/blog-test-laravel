@@ -34,24 +34,17 @@ class BlogPostController extends Controller
         }
     }
 
-    public function update(BlogPostRequest $request, BlogPost $blogPost)
+    public function update(Request $request, $id)
     {
-        // Ensure the authenticated user is the owner of the post
-        if ($blogPost->user_id !== Auth::id()) {
+        $post = BlogPost::findOrFail($id);
+
+        if ($post->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        try {
-            $blogPost->update($request->only('title', 'content'));
+        $post->update($request->only('title', 'content', 'categories'));
 
-            if ($request->has('categories')) {
-                $blogPost->categories()->sync($request->categories);
-            }
-
-            return response()->json($blogPost);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json($e->errors(), 422);
-        }
+        return response()->json(['message' => 'Post updated successfully', 'post' => $post]);
     }
 
     public function destroy(BlogPost $blogPost)
