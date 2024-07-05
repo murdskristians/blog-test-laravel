@@ -12,12 +12,16 @@
                     <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
                     <button @click="deletePost(post.id)" class="delete-button">Delete</button>
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
-                        <p v-if="!comment.editing">{{ comment.content }}</p>
-                        <input v-if="comment.editing" v-model="comment.content" />
-                        <small>by {{ comment.user.name }} on {{ new Date(comment.created_at).toLocaleString() }}</small>
-                        <button v-if="comment.user.id === user.id" @click="editComment(comment)" class="edit-button">Edit</button>
-                        <button v-if="comment.editing" @click="updateComment(comment)" class="save-button">Save</button>
-                        <button v-if="comment.user.id === user.id" @click="deleteComment(comment.id)" class="delete-button">Delete</button>
+                        <div v-if="comment.editing">
+                            <input v-model="comment.content" />
+                            <button @click="updateComment(comment)" class="save-button">Save</button>
+                        </div>
+                        <div v-else>
+                            <p>{{ comment.content }}</p>
+                            <small>by {{ comment.user.name }} on {{ new Date(comment.created_at).toLocaleString() }}</small>
+                            <button v-if="comment.user.id === user.id" @click="editComment(comment)" class="edit-button">Edit</button>
+                            <button v-if="comment.user.id === user.id" @click="deleteComment(comment.id)" class="delete-button">Delete</button>
+                        </div>
                     </div>
                     <form @submit.prevent="addComment(post.id)">
                         <textarea v-model="newComment"></textarea>
@@ -58,7 +62,15 @@ export default {
         fetchBlogPosts() {
             axios.get('/blog_posts')
                 .then(response => {
-                    this.blogPosts = response.data;
+                    this.blogPosts = response.data.map(post => {
+                        post.comments = post.comments.map(comment => {
+                            return {
+                                ...comment,
+                                editing: false
+                            };
+                        });
+                        return post;
+                    });
                 })
                 .catch(error => {
                     console.error('Error fetching blog posts:', error);
@@ -128,33 +140,9 @@ export default {
 
 <style scoped>
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.back-button-container {
-    text-align: right;
-}
-
-.back-button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    margin: 5px 0;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.back-button:hover {
-    background-color: #4b5563;
 }
 
 .title {
@@ -166,54 +154,31 @@ export default {
 
 .columns {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
 }
 
 .column {
     flex: 1;
+    margin-right: 20px;
+}
+
+.column:last-child {
+    margin-right: 0;
 }
 
 .post, .comment {
-    background-color: #ffffff;
+    background-color: #f9f9f9;
     padding: 20px;
     margin-bottom: 10px;
     border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.delete-button, .edit-button, .save-button {
-    background-color: #ef4444;
-    color: #ffffff;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-    font-size: 12px;
-    transition: background-color 0.3s;
+.comment {
+    margin-left: 20px;
 }
 
-.edit-button {
-    background-color: #3b82f6;
-}
-
-.save-button {
-    background-color: #10b981;
-}
-
-.delete-button:hover {
-    background-color: #dc2626;
-}
-
-.edit-button:hover {
-    background-color: #2563eb;
-}
-
-.save-button:hover {
-    background-color: #059669;
-}
-
-textarea {
+textarea, input[type="text"] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -221,19 +186,61 @@ textarea {
     border-radius: 5px;
 }
 
-button[type="submit"] {
+button {
     background-color: #1f2937;
     color: #ffffff;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center;
+    margin-right: 10px;
     font-size: 14px;
-    transition: background-color 0.3s;
 }
 
-button[type="submit"]:hover {
+button:hover {
     background-color: #4b5563;
+}
+
+.back-button-container {
+    text-align: right;
+}
+
+.back-button {
+    background-color: #1f2937;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.back-button:hover {
+    background-color: #4b5563;
+}
+
+.delete-button {
+    background-color: #e3342f;
+}
+
+.delete-button:hover {
+    background-color: #cc1f1a;
+}
+
+.save-button {
+    background-color: #38c172;
+}
+
+.save-button:hover {
+    background-color: #2fa360;
+}
+
+.edit-button {
+    background-color: #ffed4a;
+    color: #1f2937;
+}
+
+.edit-button:hover {
+    background-color: #fce96a;
 }
 </style>
