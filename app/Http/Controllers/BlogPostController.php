@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use Illuminate\Http\Request;
+use App\Http\Requests\BlogPostRequest;
 
 class BlogPostController extends Controller
 {
@@ -13,24 +14,19 @@ class BlogPostController extends Controller
         return response()->json($blogPosts);
     }
 
-    public function store(Request $request)
+    public function store(BlogPostRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id'
-        ]);
+        try {
+            $blogPost = BlogPost::create($request->only('title', 'content', 'user_id'));
 
-        $blogPost = BlogPost::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'user_id' => auth()->id()
-        ]);
+            if ($request->has('categories')) {
+                $blogPost->categories()->sync($request->categories);
+            }
 
-        // Attach categories
-        $blogPost->categories()->attach($request->category_id);
-
-        return response()->json($blogPost, 201);
+            return response()->json($blogPost, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json($e->errors(), 422);
+        }
     }
 
     public function show(BlogPost $blogPost)

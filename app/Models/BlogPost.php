@@ -15,12 +15,10 @@ class BlogPost extends Model {
     }
 
     public function categories() {
-        return $this->belongsToMany(Category::class, 'blog_post_category');
+        return $this->belongsToMany(Category::class, 'blog_post_category', 'blog_post_id', 'category_id');
     }
 
     public function user() {
         return $this->belongsTo(User::class);
     }
 }
-
-

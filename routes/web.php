@@ -32,19 +32,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::prefix('api')->middleware(['auth', 'verified'])->group(function () {
-    Route::resource('blog_posts', BlogPostController::class)->except(['create', 'edit']);
+    Route::resource('blog_posts', BlogPostController::class)->except(['create', 'edit'])->names([
+        'index' => 'api.blog_posts.index',
+        'show' => 'api.blog_posts.show',
+        'store' => 'api.blog_posts.store',
+        'update' => 'api.blog_posts.update',
+        'destroy' => 'api.blog_posts.destroy'
+    ]);
     Route::post('blog_posts/{post}/comments', [CommentController::class, 'store']);
     Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
-    Route::resource('categories', CategoryController::class)->except(['create', 'edit']);
+    Route::resource('categories', CategoryController::class)->except(['create', 'edit'])->names([
+        'index' => 'api.categories.index',
+        'show' => 'api.categories.show',
+        'store' => 'api.categories.store',
+        'update' => 'api.categories.update',
+        'destroy' => 'api.categories.destroy'
+    ]);
 });
 
-// Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
 Route::put('/api/comments/{id}', [CommentController::class, 'update']);
-
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('comments', CommentController::class);
 });
 
 Route::delete('/blog_posts/{id}', [BlogPostController::class, 'destroy']);
 require __DIR__.'/auth.php';
-

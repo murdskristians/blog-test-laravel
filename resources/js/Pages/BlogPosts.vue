@@ -106,23 +106,28 @@ export default {
                 });
         },
         createPost() {
-            const newPostData = {
-                ...this.newPost,
-                category_ids: this.newPost.categories.map(c => c.id) // Extract only the IDs of the categories
-            };
+    const newPostData = {
+        title: this.newPost.title,
+        content: this.newPost.content,
+        categories: this.newPost.categories.map(c => c.id),
+        user_id: this.user.id // Ensure user_id is included
+    };
 
-            axios.post('/blog_posts', newPostData)
-                .then(() => {
-                    this.newPost.title = '';
-                    this.newPost.content = '';
-                    this.newPost.categories = [];
-                    this.selectedCategory = null;
-                    this.fetchBlogPosts();
-                })
-                .catch(error => {
-                    console.error('Error creating post:', error);
-                });
-        },
+    console.log('Payload:', newPostData); // Log the payload for debugging
+
+    axios.post('/blog_posts', newPostData)
+        .then(() => {
+            this.newPost.title = '';
+            this.newPost.content = '';
+            this.newPost.categories = [];
+            this.selectedCategory = null;
+            this.fetchBlogPosts();
+        })
+        .catch(error => {
+            console.error('Error creating post:', error);
+        });
+}
+,
         deletePost(postId) {
             axios.delete(`/blog_posts/${postId}`)
                 .then(() => {
