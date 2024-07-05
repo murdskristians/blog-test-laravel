@@ -14,6 +14,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/blog_posts', [BlogPostController::class, 'store']);
     Route::get('/blog_posts/{id}', [BlogPostController::class, 'show']);
     Route::put('/blog_posts/{id}', [BlogPostController::class, 'update']);
+
+
     Route::get('/categories', [CategoryController::class, 'index']);
 });
 
