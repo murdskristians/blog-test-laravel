@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BlogPostController;
@@ -56,4 +58,10 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::delete('/blog_posts/{id}', [BlogPostController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+
 require __DIR__.'/auth.php';

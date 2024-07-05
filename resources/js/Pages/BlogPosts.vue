@@ -32,7 +32,7 @@
                     </form>
                 </div>
             </div>
-            
+
             <div class="column">
                 <h2 class="title">Add New Blog Post</h2>
                 <form @submit.prevent="createPost">
@@ -64,26 +64,41 @@
 <script>
 import axios from '../requests';
 
+axios.defaults.baseURL = 'http://127.0.0.1:8000';  // Change this to your Laravel app's URL
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
+
+
 export default {
     data() {
         return {
-            blogPosts: [],
-            categories: [],
-            selectedCategory: null, // To hold the selected category before adding it
-            newPost: {
-                title: '',
-                content: '',
-                categories: [] // Initialize as an empty array
-            },
-            user: {
-                id: 1 // You might need to get this dynamically
-            }
+        blogPosts: [],
+        categories: [],
+        selectedCategory: null,
+        newPost: {
+            title: '',
+            content: '',
+            categories: [] // Initialize as an empty array
+        },
+        user: {
+            id: null
+        }
         };
     },
     methods: {
-        fetchBlogPosts() {
-            axios.get('/blog_posts')
-                .then(response => {
+    async fetchUser() {
+        try {
+            const response = await axios.get('/api/user');
+            this.user.id = response.data.id;
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    },
+    fetchBlogPosts() {
+        axios.get('/api/blog_posts')
+            .then(response => {
+                // Assuming response.data is an array of blog posts
+                if (Array.isArray(response.data)) {
                     this.blogPosts = response.data.map(post => {
                         post.comments = post.comments.map(comment => {
                             return {
@@ -94,104 +109,114 @@ export default {
                         post.newComment = ''; // Add a newComment property to each post
                         return post;
                     });
-                })
-                .catch(error => {
-                    console.error('Error fetching blog posts:', error);
-                });
-        },
-        fetchCategories() {
-            axios.get('/categories')
-                .then(response => {
-                    this.categories = response.data;
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
-                });
-        },
-        createPost() {
-            const newPostData = {
-                title: this.newPost.title,
-                content: this.newPost.content,
-                categories: this.newPost.categories.map(c => c.id),
-                user_id: this.user.id // Ensure user_id is included
-            };
+                } else {
+                    console.error('Unexpected response structure:', response.data);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching blog posts:', error);
+            });
+    },
+    fetchCategories() {
+        axios.get('/api/categories')
+            .then(response => {
+                this.categories = response.data;
+            })
+            .catch(error => {
+                console.error('Error fetching categories:', error);
+            });
+    },
+    createPost() {
+        const newPostData = {
+            title: this.newPost.title,
+            content: this.newPost.content,
+            categories: this.newPost.categories.map(c => c.id),
+            user_id: this.user.id // Ensure user_id is included
+        };
 
-            console.log('Payload:', newPostData); // Log the payload for debugging
+        console.log('Payload:', newPostData); // Log the payload for debugging
 
-            axios.post('/blog_posts', newPostData)
-                .then(() => {
-                    this.newPost.title = '';
-                    this.newPost.content = '';
-                    this.newPost.categories = [];
-                    this.selectedCategory = null;
-                    this.fetchBlogPosts();
-                })
-                .catch(error => {
-                    console.error('Error creating post:', error);
-                });
-        },
-        deletePost(postId) {
-            axios.delete(`/blog_posts/${postId}`)
-                .then(() => {
-                    this.fetchBlogPosts();
-                })
-                .catch(error => {
-                    console.error('Error deleting post:', error);
-                });
-        },
-        addComment(postId) {
-            const post = this.blogPosts.find(p => p.id === postId);
+        axios.post('/api/blog_posts', newPostData)
+            .then(() => {
+                this.newPost.title = '';
+                this.newPost.content = '';
+                this.newPost.categories = [];
+                this.selectedCategory = null;
+                this.fetchBlogPosts();
+            })
+            .catch(error => {
+                console.error('Error creating post:', error);
+            });
+    },
+    deletePost(postId) {
+        axios.delete(`/api/blog_posts/${postId}`)
+            .then(() => {
+                this.fetchBlogPosts();
+            })
+            .catch(error => {
+                console.error('Error deleting post:', error);
+            });
+    },
+    addComment(postId) {
+        const post = this.blogPosts.find(p => p.id === postId);
 
-            if (post.newComment.trim() !== '') {
-                axios.post(`/blog_posts/${postId}/comments`, { content: post.newComment })
-                    .then(() => {
-                        post.newComment = '';
-                        this.fetchBlogPosts();
-                    })
-                    .catch(error => {
-                        console.error('Error adding comment:', error);
-                    });
-            }
-        },
-        editComment(comment) {
-            comment.editing = true;
-        },
-        updateComment(comment) {
-            axios.put(`/comments/${comment.id}`, { content: comment.content })
+        if (post.newComment.trim() !== '') {
+            axios.post(`/api/blog_posts/${postId}/comments`, { content: post.newComment })
                 .then(() => {
-                    comment.editing = false;
+                    post.newComment = '';
                     this.fetchBlogPosts();
                 })
                 .catch(error => {
-                    console.error('Error updating comment:', error);
+                    console.error('Error adding comment:', error);
                 });
-        },
-        deleteComment(commentId) {
-            axios.delete(`/comments/${commentId}`)
-                .then(() => {
-                    this.fetchBlogPosts();
-                })
-                .catch(error => {
-                    console.error('Error deleting comment:', error);
-                });
-        },
-        goBack() {
-            this.$inertia.get('/dashboard');
-        },
-        addCategory() {
-            const category = this.categories.find(cat => cat.id === this.selectedCategory);
-            if (category && !this.newPost.categories.find(cat => cat.id === category.id)) {
-                this.newPost.categories.push(category);
-            }
-        },
-        removeCategory(categoryId) {
-            this.newPost.categories = this.newPost.categories.filter(cat => cat.id !== categoryId);
         }
     },
-    mounted() {
-        this.fetchBlogPosts();
-        this.fetchCategories(); // Fetch categories when component is mounted
+    editComment(comment) {
+        comment.editing = true;
+    },
+    updateComment(comment) {
+        axios.put(`/comments/${comment.id}`, { content: comment.content })
+            .then(() => {
+                comment.editing = false;
+                this.fetchBlogPosts();
+            })
+            .catch(error => {
+                console.error('Error updating comment:', error);
+            });
+    },
+    deleteComment(commentId) {
+        axios.delete(`/comments/${commentId}`)
+            .then(() => {
+                this.fetchBlogPosts();
+            })
+            .catch(error => {
+                console.error('Error deleting comment:', error);
+            });
+    },
+    goBack() {
+        this.$inertia.get('/dashboard');
+    },
+    addCategory() {
+        const category = this.categories.find(cat => cat.id === this.selectedCategory);
+        if (category && !this.newPost.categories.find(cat => cat.id === category.id)) {
+            this.newPost.categories.push(category);
+        }
+    },
+    removeCategory(categoryId) {
+        this.newPost.categories = this.newPost.categories.filter(cat => cat.id !== categoryId);
     }
+},
+created() {
+    this.fetchUser().then(() => {
+        console.log(this.user);
+        console.log(this.user.id);
+    });
+},
+mounted() {
+    this.fetchBlogPosts();
+    this.fetchCategories(); // Fetch categories when component is mounted
+}
+
 };
 </script>
 
