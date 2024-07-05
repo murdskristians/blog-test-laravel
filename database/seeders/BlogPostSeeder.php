@@ -10,7 +10,7 @@ class BlogPostSeeder extends Seeder
 {
     public function run()
     {
-        BlogPost::factory(5)->create()->each(function ($post) {
+        BlogPost::factory()->count(5)->create()->each(function ($post) {
             $categories = Category::inRandomOrder()->take(rand(0, 2))->pluck('id');
             $post->categories()->attach($categories);
         });
