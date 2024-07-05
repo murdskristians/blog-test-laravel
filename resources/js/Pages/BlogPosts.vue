@@ -2,7 +2,7 @@
     <div class="container">
         <div class="back-button-container">
             <button @click="goBack" class="back-button">Back to Dashboard</button>
-            <a data-v-8e8f4dea="" class="button" href="/categories">Categories</a>
+            <a class="button" href="/categories">Categories</a>
         </div>
 
         <h1 class="title">Blog Posts</h1>
@@ -12,7 +12,7 @@
                     <h2>{{ post.title }}</h2>
                     <p>{{ post.content }}</p>
                     <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                    <div>Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
+                    <div class="blog-post_categories">Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
                     <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
                         <div v-if="comment.editing">
@@ -27,11 +27,12 @@
                         </div>
                     </div>
                     <form @submit.prevent="addComment(post.id)">
-                        <textarea v-model="newComment"></textarea>
+                        <textarea v-model="post.newComment"></textarea>
                         <button type="submit">Add Comment</button>
                     </form>
                 </div>
             </div>
+            
             <div class="column">
                 <h2 class="title">Add New Blog Post</h2>
                 <form @submit.prevent="createPost">
@@ -74,7 +75,6 @@ export default {
                 content: '',
                 categories: [] // Initialize as an empty array
             },
-            newComment: '',
             user: {
                 id: 1 // You might need to get this dynamically
             }
@@ -91,6 +91,7 @@ export default {
                                 editing: false // Add the editing property
                             };
                         });
+                        post.newComment = ''; // Add a newComment property to each post
                         return post;
                     });
                 })
@@ -108,28 +109,27 @@ export default {
                 });
         },
         createPost() {
-    const newPostData = {
-        title: this.newPost.title,
-        content: this.newPost.content,
-        categories: this.newPost.categories.map(c => c.id),
-        user_id: this.user.id // Ensure user_id is included
-    };
+            const newPostData = {
+                title: this.newPost.title,
+                content: this.newPost.content,
+                categories: this.newPost.categories.map(c => c.id),
+                user_id: this.user.id // Ensure user_id is included
+            };
 
-    console.log('Payload:', newPostData); // Log the payload for debugging
+            console.log('Payload:', newPostData); // Log the payload for debugging
 
-    axios.post('/blog_posts', newPostData)
-        .then(() => {
-            this.newPost.title = '';
-            this.newPost.content = '';
-            this.newPost.categories = [];
-            this.selectedCategory = null;
-            this.fetchBlogPosts();
-        })
-        .catch(error => {
-            console.error('Error creating post:', error);
-        });
-}
-,
+            axios.post('/blog_posts', newPostData)
+                .then(() => {
+                    this.newPost.title = '';
+                    this.newPost.content = '';
+                    this.newPost.categories = [];
+                    this.selectedCategory = null;
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error creating post:', error);
+                });
+        },
         deletePost(postId) {
             axios.delete(`/blog_posts/${postId}`)
                 .then(() => {
@@ -140,14 +140,18 @@ export default {
                 });
         },
         addComment(postId) {
-            axios.post(`/blog_posts/${postId}/comments`, { content: this.newComment })
-                .then(() => {
-                    this.newComment = '';
-                    this.fetchBlogPosts();
-                })
-                .catch(error => {
-                    console.error('Error adding comment:', error);
-                });
+            const post = this.blogPosts.find(p => p.id === postId);
+
+            if (post.newComment.trim() !== '') {
+                axios.post(`/blog_posts/${postId}/comments`, { content: post.newComment })
+                    .then(() => {
+                        post.newComment = '';
+                        this.fetchBlogPosts();
+                    })
+                    .catch(error => {
+                        console.error('Error adding comment:', error);
+                    });
+            }
         },
         editComment(comment) {
             comment.editing = true;
@@ -190,6 +194,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped>
 .container {
@@ -291,6 +296,7 @@ button:hover {
 .edit-button {
     background-color: #ffed4a;
     color: #1f2937;
+    margin-left: 30px;
 }
 
 .edit-button:hover {
@@ -318,5 +324,21 @@ button:hover {
 
 .button:hover {
     background-color: #4b5563;
+}
+
+.blog-post_categories {
+    margin: 20px 0 30px 0;
+}
+
+.blog-post_create-post-btn {
+    margin-bottom: 30px;
+}
+
+.blog-post_selected_category {
+    margin-top: 10px;
+}
+
+.blog-post_selected_category_delete_btn {
+    margin-left: 30px;
 }
 </style>
