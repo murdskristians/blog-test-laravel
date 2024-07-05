@@ -63,4 +63,23 @@ class BlogPostController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+
+        $posts = BlogPost::where('title', 'LIKE', "%{$keyword}%")
+            ->orWhere('content', 'LIKE', "%{$keyword}%")
+            ->with('categories', 'user', 'comments.user')
+            ->get();
+
+        return response()->json($posts);
+    }
+
+    public function show($id)
+    {
+        $post = BlogPost::with('categories', 'user', 'comments.user')->findOrFail($id);
+        return response()->json($post);
+    }
+
 }

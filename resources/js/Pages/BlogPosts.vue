@@ -6,6 +6,9 @@
         </div>
 
         <h1 class="title">Blog Posts</h1>
+        <div class="search-bar">
+            <input v-model="searchKeyword" @input="searchBlogPosts" placeholder="Search blog posts..." />
+        </div>
         <div class="columns">
             <div class="column is-three-quarters">
                 <div v-for="post in blogPosts" :key="post.id" class="post">
@@ -108,10 +111,35 @@ export default {
             },
             user: {
                 id: null
-            }
+            },
+            searchKeyword: ''
         };
     },
     methods: {
+            searchBlogPosts() {
+            if (this.searchKeyword.trim() === '') {
+                this.fetchBlogPosts();
+                return;
+            }
+
+            axios.get('/api/blog_posts/search', { params: { keyword: this.searchKeyword } })
+                .then(response => {
+                    this.blogPosts = response.data.map(post => {
+                        post.comments = post.comments.map(comment => {
+                            return {
+                                ...comment,
+                                editing: false
+                            };
+                        });
+                        post.newComment = '';
+                        post.editing = false;
+                        return post;
+                    }).reverse();
+                })
+                .catch(error => {
+                    console.error('Error searching blog posts:', error);
+                });
+        },
         async fetchUser() {
             try {
                 const response = await axios.get('/api/user');
