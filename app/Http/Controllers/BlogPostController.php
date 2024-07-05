@@ -15,41 +15,46 @@ class BlogPostController extends Controller
         return response()->json($blogPosts);
     }
 
-    public function store(BlogPostRequest $request)
+    public function store(Request $request)
     {
-        try {
-            $blogPost = BlogPost::create([
-                'title' => $request->title,
-                'content' => $request->content,
-                'user_id' => Auth::id(), // Associate the post with the authenticated user
-            ]);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'categories' => 'array|exists:categories,id', // assuming categories is an array of category IDs
+        ]);
 
-            if ($request->has('categories')) {
-                $blogPost->categories()->sync($request->categories);
-            }
+        $post = new BlogPost();
+        $post->title = $request->input('title');
+        $post->content = $request->input('content');
+        $post->user_id = Auth::id();
+        $post->save();
 
-            return response()->json($blogPost, 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json($e->errors(), 422);
-        }
+        $post->categories()->sync($request->input('categories', []));
+
+        return response()->json($post, 201);
     }
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'categories' => 'array|exists:categories,id',
+        ]);
+
         $post = BlogPost::findOrFail($id);
 
-        if ($post->user_id != auth()->id()) {
+        if ($post->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $post->update($request->only('title', 'content'));
+        $post->title = $request->input('title');
+        $post->content = $request->input('content');
+        $post->save();
 
-        // Update categories
-        if ($request->has('categories')) {
-            $post->categories()->sync($request->categories);
-        }
+        $post->categories()->sync($request->input('categories', []));
 
-        return response()->json(['message' => 'Post updated successfully', 'post' => $post->load('categories')]);
+        return response()->json(['message' => 'Post updated successfully', 'post' => $post]);
     }
 
     public function destroy(BlogPost $blogPost)

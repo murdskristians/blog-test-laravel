@@ -11,15 +11,13 @@ class CommentController extends Controller
     public function store(Request $request, $postId)
     {
         $request->validate([
-            'content' => 'required|string',
+            'content' => 'required|string|max:500',
         ]);
-
-        $post = BlogPost::findOrFail($postId);
 
         $comment = new Comment();
         $comment->content = $request->input('content');
-        $comment->user_id = auth()->id();
-        $comment->blog_post_id = $post->id;
+        $comment->user_id = Auth::id();
+        $comment->blog_post_id = $postId;
         $comment->save();
 
         return response()->json($comment, 201);
@@ -36,13 +34,18 @@ class CommentController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'content' => 'required|string',
+            'content' => 'required|string|max:500',
         ]);
 
         $comment = Comment::findOrFail($id);
+
+        if ($comment->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $comment->content = $request->input('content');
         $comment->save();
 
-        return response()->json($comment, 200);
+        return response()->json(['message' => 'Comment updated successfully', 'comment' => $comment]);
     }
 }
