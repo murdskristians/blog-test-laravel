@@ -95,28 +95,29 @@ export default {
         }
     },
     fetchBlogPosts() {
-        axios.get('/api/blog_posts')
-            .then(response => {
-                // Assuming response.data is an array of blog posts
-                if (Array.isArray(response.data)) {
-                    this.blogPosts = response.data.map(post => {
-                        post.comments = post.comments.map(comment => {
-                            return {
-                                ...comment,
-                                editing: false // Add the editing property
-                            };
-                        });
-                        post.newComment = ''; // Add a newComment property to each post
-                        return post;
+    axios.get('/api/blog_posts')
+        .then(response => {
+            // Assuming response.data is an array of blog posts
+            if (Array.isArray(response.data)) {
+                this.blogPosts = response.data.map(post => {
+                    post.comments = post.comments.map(comment => {
+                        return {
+                            ...comment,
+                            editing: false // Add the editing property
+                        };
                     });
-                } else {
-                    console.error('Unexpected response structure:', response.data);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching blog posts:', error);
-            });
-    },
+                    post.newComment = ''; // Add a newComment property to each post
+                    return post;
+                }).reverse(); // Reverse the order of the posts
+            } else {
+                console.error('Unexpected response structure:', response.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching blog posts:', error);
+        });
+}
+,
     fetchCategories() {
         axios.get('/api/categories')
             .then(response => {
