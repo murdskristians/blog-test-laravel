@@ -9,8 +9,8 @@ class BlogPostController extends Controller
 {
     public function index()
     {
-        $posts = BlogPost::with(['user', 'comments.user'])->get();
-        return response()->json($posts);
+        $blogPosts = BlogPost::with(['user', 'comments.user', 'categories'])->get();
+        return response()->json($blogPosts);
     }
 
     public function store(Request $request)
@@ -18,47 +18,49 @@ class BlogPostController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
-        $post = new BlogPost();
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
-        $post->user_id = auth()->id();
-        $post->save();
+        $blogPost = BlogPost::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'user_id' => auth()->id()
+        ]);
 
-        return response()->json($post, 201);
+        // Attach categories
+        $blogPost->categories()->attach($request->category_id);
+
+        return response()->json($blogPost, 201);
     }
 
-    public function show($id)
+    public function show(BlogPost $blogPost)
     {
-        $post = BlogPost::with(['user', 'comments.user'])->findOrFail($id);
-        return response()->json($post);
+        return response()->json($blogPost->load(['user', 'comments.user', 'categories']));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, BlogPost $blogPost)
     {
+        $this->authorize('update', $blogPost);
+
         $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title' => 'sometimes|string|max:255',
+            'content' => 'sometimes|string'
         ]);
 
-        $post = BlogPost::findOrFail($id);
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
-        $post->save();
+        $blogPost->update($request->only(['title', 'content']));
 
-        return response()->json($post);
+        if ($request->has('category_id')) {
+            $blogPost->categories()->sync($request->category_id);
+        }
+
+        return response()->json($blogPost);
     }
 
     public function destroy(BlogPost $blogPost)
     {
-        // Delete comments associated with the blog post
-        $blogPost->comments()->delete();
-
-        // Delete the blog post itself
+        $this->authorize('delete', $blogPost);
         $blogPost->delete();
 
-        return response()->json(['message' => 'Blog post deleted successfully']);
+        return response()->json(null, 204);
     }
-
 }

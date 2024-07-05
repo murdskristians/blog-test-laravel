@@ -10,7 +10,11 @@
                     <h2>{{ post.title }}</h2>
                     <p>{{ post.content }}</p>
                     <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
+                    <div v-if="post.categories.length" class="blog_post_categories">
+                        <strong>Categories: </strong>
+                        <span v-for="category in post.categories" :key="category.id">{{ category.name }}, </span>
+                    </div>
+                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button blog-post_delete-button">Delete</button>
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
                         <div v-if="comment.editing">
                             <input v-model="comment.content" />
@@ -242,5 +246,13 @@ button:hover {
 
 .edit-button:hover {
     background-color: #fce96a;
+}
+
+.blog_post_categories {
+    padding: 30px 0 10px;
+}
+
+.blog-post_delete-button{
+    margin: 0 0 30px 0;
 }
 </style>
