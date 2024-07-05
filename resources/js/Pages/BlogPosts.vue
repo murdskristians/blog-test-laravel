@@ -10,7 +10,7 @@
                     <h2>{{ post.title }}</h2>
                     <p>{{ post.content }}</p>
                     <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                    <button @click="deletePost(post.id)" class="delete-button">Delete</button>
+                    <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
                     <div v-for="comment in post.comments" :key="comment.id" class="comment">
                         <div v-if="comment.editing">
                             <input v-model="comment.content" />
@@ -110,7 +110,6 @@ export default {
             comment.editing = true;
         },
         updateComment(comment) {
-            // console.log('Updating comment:', comment); 
             axios.put(`/comments/${comment.id}`, { content: comment.content })
                 .then(() => {
                     comment.editing = false;
