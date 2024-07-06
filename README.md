@@ -26,8 +26,11 @@ Step 4: Set Up Environment Configuration
 cp .env.example .env
 2. Open the .env file in a text editor and update the following configurations as needed:
 In my personal case i did use SQLite, so i configures like this:
+
 DB_CONNECTION=sqlite
+
 DB_DATABASE=C:/Users/Pc/Desktop/WORK/blog-test-laravel/database/database.sqlite
+
 //DB_HOST=127.0.0.1
 //DB_PORT=3306
 //DB_DATABASE=laravel
