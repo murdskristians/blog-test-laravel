@@ -93,7 +93,7 @@
 <script>
 import axios from '../requests';
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000';  // Change this to your Laravel app's URL
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
 
@@ -106,7 +106,7 @@ export default {
             newPost: {
                 title: '',
                 content: '',
-                categories: [] // Initialize as an empty array
+                categories: []
             },
             user: {
                 id: null
@@ -155,13 +155,13 @@ export default {
                             post.comments = post.comments.map(comment => {
                                 return {
                                     ...comment,
-                                    editing: false // Add the editing property
+                                    editing: false
                                 };
                             });
-                            post.newComment = ''; // Add a newComment property to each post
-                            post.editing = false; // Add the editing property for posts
+                            post.newComment = '';
+                            post.editing = false;
                             return post;
-                        }).reverse(); // Reverse the order of the posts
+                        }).reverse();
                     } else {
                         console.error('Unexpected response structure:', response.data);
                     }
@@ -184,10 +184,10 @@ export default {
                 title: this.newPost.title,
                 content: this.newPost.content,
                 categories: this.newPost.categories.map(c => c.id),
-                user_id: this.user.id // Ensure user_id is included
+                user_id: this.user.id
             };
 
-            console.log('Payload:', newPostData); // Log the payload for debugging
+            console.log('Payload:', newPostData);
 
             axios.post('/api/blog_posts', newPostData)
                 .then(() => {
@@ -222,7 +222,7 @@ export default {
             const updatedPostData = {
                 title: post.title,
                 content: post.content,
-                categories: post.categories.map(c => c.id) // Include category IDs
+                categories: post.categories.map(c => c.id)
             };
 
             axios.put(`/api/blog_posts/${post.id}`, updatedPostData)
@@ -300,7 +300,7 @@ export default {
     },
     mounted() {
         this.fetchBlogPosts();
-        this.fetchCategories(); // Fetch categories when component is mounted
+        this.fetchCategories(); 
     }
 };
 </script>

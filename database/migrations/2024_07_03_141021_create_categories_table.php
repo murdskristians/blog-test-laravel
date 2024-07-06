@@ -17,7 +17,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Pivot table for blog post categories
         Schema::create('blog_post_category', function (Blueprint $table) {
             $table->id();
             $table->foreignId('blog_post_id')->constrained()->onDelete('cascade');
