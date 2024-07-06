@@ -7,8 +7,9 @@
 
         <h1 class="title">Blog Posts</h1>
         <div class="search-bar">
-            <input v-model="searchKeyword" @input="searchBlogPosts" placeholder="Search blog posts..." />
+            <input v-model="searchKeyword" @input="searchBlogPosts" class="search-input" placeholder="Search blog posts..." />
         </div>
+
         <div class="columns">
             <div class="column is-three-quarters">
                 <div v-for="post in blogPosts" :key="post.id" class="post">
@@ -300,7 +301,7 @@ export default {
     },
     mounted() {
         this.fetchBlogPosts();
-        this.fetchCategories(); 
+        this.fetchCategories();
     }
 };
 </script>
@@ -450,4 +451,31 @@ button:hover {
 .blog-post_selected_category_delete_btn {
     margin-left: 30px;
 }
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+    width: 100%;
+    padding: 10px;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px 20px;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+
 </style>
