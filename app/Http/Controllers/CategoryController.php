@@ -19,29 +19,29 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $category = Category::create($request->only('name'));
+        $category = new Category();
+        $category->name = strip_tags($request->input('name'));
+        $category->save();
 
         return response()->json($category, 201);
     }
 
-    public function show(Category $category)
-    {
-        return response()->json($category);
-    }
-
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        $category->update($request->only('name'));
+        $category = Category::findOrFail($id);
+        $category->name = strip_tags($request->input('name'));
+        $category->save();
 
         return response()->json($category);
     }
 
-    public function destroy(Category $category)
+    public function destroy($id)
     {
+        $category = Category::findOrFail($id);
         $category->delete();
 
         return response()->json(null, 204);

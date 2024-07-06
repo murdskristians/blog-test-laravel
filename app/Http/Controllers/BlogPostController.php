@@ -24,8 +24,8 @@ class BlogPostController extends Controller
         ]);
 
         $post = new BlogPost();
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
+        $post->title = strip_tags($request->input('title'));
+        $post->content = strip_tags($request->input('content'));
         $post->user_id = Auth::id();
         $post->save();
 
@@ -48,8 +48,8 @@ class BlogPostController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $post->title = $request->input('title');
-        $post->content = $request->input('content');
+        $post->title = strip_tags($request->input('title'));
+        $post->content = strip_tags($request->input('content'));
         $post->save();
 
         $post->categories()->sync($request->input('categories', []));
@@ -71,7 +71,7 @@ class BlogPostController extends Controller
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $keyword = strip_tags($request->input('keyword'));
 
         $posts = BlogPost::where('title', 'LIKE', "%{$keyword}%")
             ->orWhere('content', 'LIKE', "%{$keyword}%")
@@ -86,5 +86,4 @@ class BlogPostController extends Controller
         $post = BlogPost::with('categories', 'user', 'comments.user')->findOrFail($id);
         return response()->json($post);
     }
-
 }
