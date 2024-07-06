@@ -248,14 +248,17 @@ export default {
             const post = this.blogPosts.find(p => p.id === postId);
 
             if (post.newComment.trim() !== '') {
-                axios.post(`/api/blog_posts/${postId}/comments`, { content: post.newComment })
-                    .then(() => {
-                        post.newComment = '';
-                        this.fetchBlogPosts();
-                    })
-                    .catch(error => {
-                        console.error('Error adding comment:', error);
-                    });
+                axios.post(`/api/blog_posts/${postId}/comments`, {
+                    content: post.newComment,
+                    blog_post_id: postId  // Include blog_post_id in the request payload
+                })
+                .then(() => {
+                    post.newComment = '';
+                    this.fetchBlogPosts();
+                })
+                .catch(error => {
+                    console.error('Error adding comment:', error);
+                });
             }
         },
         editComment(comment) {

@@ -9,18 +9,17 @@ use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    public function store(Request $request, $postId)
+    public function store(Request $request)
     {
         $request->validate([
             'content' => 'required|string',
+            'blog_post_id' => 'required|exists:blog_posts,id',
         ]);
 
-        $post = BlogPost::findOrFail($postId);
-
         $comment = new Comment();
-        $comment->content = strip_tags($request->input('content'));
+        $comment->content = $request->input('content');
         $comment->user_id = Auth::id();
-        $comment->post_id = $post->id;
+        $comment->blog_post_id = $request->input('blog_post_id');
         $comment->save();
 
         return response()->json($comment, 201);
@@ -38,7 +37,7 @@ class CommentController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $comment->content = strip_tags($request->input('content'));
+        $comment->content = $request->input('content');
         $comment->save();
 
         return response()->json($comment);
