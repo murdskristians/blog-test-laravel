@@ -1,67 +1,66 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# To launch the app you need to:
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Step 1: Clone the Repository
 
-## About Laravel
+1. Open a terminal or command prompt.
+2. Navigate to the directory where you want to clone the project.
+3. Clone the project from github.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Step 2: Navigate to the Project Directory
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Change into the project directory:
+cd your-repository
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Step 3: Install Dependencies
 
-## Learning Laravel
+1. Ensure you have Composer installed.
+2. Run the following command to install the PHP: 
+composer install
+3. Ensure you have Node.js and npm installed.
+4. Run the following command to install the Node.js dependencies:
+npm install
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Step 4: Set Up Environment Configuration
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. Copy the .env.example file to create a new .env file:
+cp .env.example .env
+2. Open the .env file in a text editor and update the following configurations as needed:
+In my personal case i did use SQLite, so i configures like this:
+DB_CONNECTION=sqlite
+DB_DATABASE=C:/Users/Pc/Desktop/WORK/blog-test-laravel/database/database.sqlite
+//DB_HOST=127.0.0.1
+//DB_PORT=3306
+//DB_DATABASE=laravel
+//DB_USERNAME=root
+//DB_PASSWORD=
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
+Step 5: Generate Application Key
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Run the following command to generate the application key:
+php artisan key:generate
 
-### Premium Partners
+Step 6: Set Up the Database
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+1. Ensure your database server is running.
+2. Run the following command to migrate the database:
+php artisan migrate
 
-## Contributing
+Step 7: Seed the Database (Optional)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Run the following command:
+php artisan db:seed
 
-## Code of Conduct
+Step 8: Compile Assets
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Run the following command to compile the frontend assets:
+npm run dev
 
-## Security Vulnerabilities
+Step 9: Start the Development Server
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Run the following command to start the Laravel development server:
+php artisan serve
 
-## License
+2. Open your web browser and navigate to the URL provided in the terminal (usually http://127.0.0.1:8000).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# blog-test-laravel
+Step 10: Enjoy the code!
