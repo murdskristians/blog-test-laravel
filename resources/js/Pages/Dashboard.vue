@@ -16,30 +16,11 @@ import { Head, Link } from '@inertiajs/vue3';
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">You're logged in!</div>
                     <div class="p-6">
-                        <Link href="/blog_posts" class="button">Blog Posts</Link>
-                        <Link href="/categories" class="button">Categories</Link>
+                        <Link href="/blog_posts" class="bg-gray-900 text-white py-2 px-4 my-2 rounded-lg hover:bg-gray-700 transition duration-300 text-center inline-block">Blog Posts</Link>
+                        <Link href="/categories" class="bg-gray-900 text-white py-2 px-4 my-2 rounded-lg hover:bg-gray-700 transition duration-300 text-center inline-block">Categories</Link>
                     </div>
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #4b5563;
-}
-</style>
