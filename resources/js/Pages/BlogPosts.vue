@@ -1,87 +1,92 @@
 <template>
-    <div class="container">
-        <div class="back-button-container">
-            <button @click="goBack" class="back-button">Back to Dashboard</button>
-            <a class="button" href="/categories">Categories</a>
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-end mb-6">
+            <button @click="goBack" class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300 mr-2">Back to Dashboard</button>
+            <a class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300" href="/categories">Categories</a>
         </div>
 
-        <h1 class="title">Blog Posts</h1>
-        <div class="search-bar">
-            <input v-model="searchKeyword" @input="searchBlogPosts" class="search-input" placeholder="Search blog posts..." />
+        <h1 class="text-2xl font-bold text-center mb-6">Blog Posts</h1>
+
+        <div class="flex justify-center mb-6">
+            <input v-model="searchKeyword" @input="searchBlogPosts" class="w-full max-w-xl p-3 border-2 border-gray-300 rounded-full focus:border-blue-500 focus:shadow-outline transition duration-300" placeholder="Search blog posts..." />
         </div>
 
-        <div class="columns">
-            <div class="column is-three-quarters">
-                <div v-for="post in blogPosts" :key="post.id" class="post">
+        <div class="flex flex-wrap -mx-4">
+            <div class="w-full lg:w-3/4 px-4 mb-6 lg:mb-0">
+                <div v-for="post in blogPosts" :key="post.id" class="bg-white shadow-md rounded-lg p-6 mb-6">
                     <div v-if="post.editing">
-                        <input v-model="post.title" />
-                        <textarea v-model="post.content"></textarea>
-                        <div>
-                            <label>Select Categories: </label>
-                            <select v-model="post.selectedCategory" @change="addCategoryToPost(post)" class="blog-post_category_selector">
+                        <input v-model="post.title" class="w-full p-2 mb-4 border rounded" />
+                        <textarea v-model="post.content" class="w-full p-2 mb-4 border rounded"></textarea>
+                        <div class="mb-4">
+                            <label class="block mb-2">Select Categories:</label>
+                            <select v-model="post.selectedCategory" @change="addCategoryToPost(post)" class="w-full p-2 border rounded">
                                 <option value="" disabled selected>Select category</option>
                                 <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
                             </select>
                         </div>
-                        <button @click="updatePost(post)" class="save-button">Save</button>
-                        <button @click="cancelEdit(post)" class="cancel-button">Cancel</button>
-                        <div v-if="post.categories.length">
-                            <h3>Selected Categories:</h3>
+                        <button @click="updatePost(post)" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 mr-2">Save</button>
+                        <button @click="cancelEdit(post)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Cancel</button>
+                        <div v-if="post.categories.length" class="mt-4">
+                            <h3 class="font-semibold mb-2">Selected Categories:</h3>
                             <ul>
-                                <li class="blog-post_selected_category" v-for="category in post.categories" :key="category.id">
+                                <li v-for="category in post.categories" :key="category.id" class="flex justify-between items-center mb-2">
                                     {{ category.name }}
-                                    <button class="blog-post_selected_category_delete_btn" type="button" @click="removeCategoryFromPost(post, category.id)">Remove</button>
+                                    <button @click="removeCategoryFromPost(post, category.id)" class="bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-700 transition duration-300">Remove</button>
                                 </li>
                             </ul>
                         </div>
                     </div>
                     <div v-else>
-                        <h2>{{ post.title }}</h2>
+                        <h2 class="text-xl font-semibold">{{ post.title }}</h2>
                         <p>{{ post.content }}</p>
-                        <small>by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
-                        <div class="blog-post_categories">Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
-                        <button v-if="post.user.id === user.id" @click="startEdit(post)" class="edit-button">Edit</button>
-                        <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="delete-button">Delete</button>
+                        <small class="text-gray-600">by {{ post.user.name }} on {{ new Date(post.created_at).toLocaleString() }}</small>
+                        <div class="mt-2">Categories: {{ post.categories.map(category => category.name).join(', ') }}</div>
+                        <div class="mt-4">
+                            <button v-if="post.user.id === user.id" @click="startEdit(post)" class="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition duration-300 mr-2">Edit</button>
+                            <button v-if="post.user.id === user.id" @click="deletePost(post.id)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Delete</button>
+                        </div>
                     </div>
 
-                    <div v-for="comment in post.comments" :key="comment.id" class="comment">
+                    <div v-for="comment in post.comments" :key="comment.id" class="bg-gray-100 p-4 mt-4 rounded-lg">
                         <div v-if="comment.editing">
-                            <input v-model="comment.content" />
-                            <button @click="updateComment(comment)" class="save-button">Save</button>
+                            <input v-model="comment.content" class="w-full p-2 mb-4 border rounded" />
+                            <button @click="updateComment(comment)" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 mr-2">Save</button>
                         </div>
                         <div v-else>
                             <p>{{ comment.content }}</p>
-                            <small>by {{ comment.user.name }} on {{ new Date(comment.created_at).toLocaleString() }}</small>
-                            <button v-if="comment.user.id === user.id" @click="editComment(comment)" class="edit-button">Edit</button>
-                            <button v-if="comment.user.id === user.id" @click="deleteComment(comment.id)" class="delete-button">Delete</button>
+                            <small class="text-gray-600">by {{ comment.user.name }} on {{ new Date(comment.created_at).toLocaleString() }}</small>
+                            <div class="mt-2">
+                                <button v-if="comment.user.id === user.id" @click="editComment(comment)" class="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition duration-300 mr-2">Edit</button>
+                                <button v-if="comment.user.id === user.id" @click="deleteComment(comment.id)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Delete</button>
+                            </div>
                         </div>
                     </div>
-                    <form @submit.prevent="addComment(post.id)">
-                        <textarea v-model="post.newComment"></textarea>
-                        <button type="submit">Add Comment</button>
+                    <form @submit.prevent="addComment(post.id)" class="mt-4">
+                        <textarea v-model="post.newComment" class="w-full p-2 mb-4 border rounded" placeholder="Add a comment..."></textarea>
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Add Comment</button>
                     </form>
                 </div>
             </div>
 
-            <div class="column">
-                <h2 class="title">Add New Blog Post</h2>
-                <form @submit.prevent="createPost">
-                    <input v-model="newPost.title" placeholder="Title" />
-                    <textarea v-model="newPost.content" placeholder="Body"></textarea>
-                    <div>
-                        <label>Select Categories: </label>
-                        <select v-model="selectedCategory" @change="addCategory" class="blog-post_category_selector">
+            <div class="w-full lg:w-1/4 px-4">
+                <h2 class="text-xl font-bold mb-4">Add New Blog Post</h2>
+                <form @submit.prevent="createPost" class="bg-white shadow-md rounded-lg p-6">
+                    <input v-model="newPost.title" class="w-full p-2 mb-4 border rounded" placeholder="Title" />
+                    <textarea v-model="newPost.content" class="w-full p-2 mb-4 border rounded" placeholder="Body"></textarea>
+                    <div class="mb-4">
+                        <label class="block mb-2">Select Categories:</label>
+                        <select v-model="selectedCategory" @change="addCategory" class="w-full p-2 border rounded">
                             <option value="" disabled selected>Select category</option>
                             <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
                         </select>
                     </div>
-                    <button type="submit" class="blog-post_create-post-btn">Create Post</button>
-                    <div v-if="newPost.categories.length">
-                        <h3>Selected Categories:</h3>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Create Post</button>
+                    <div v-if="newPost.categories.length" class="mt-4">
+                        <h3 class="font-semibold mb-2">Selected Categories:</h3>
                         <ul>
-                            <li class="blog-post_selected_category" v-for="category in newPost.categories" :key="category.id">
+                            <li v-for="category in newPost.categories" :key="category.id" class="flex justify-between items-center mb-2">
                                 {{ category.name }}
-                                <button class="blog-post_selected_category_delete_btn" type="button" @click="removeCategory(category.id)">Remove</button>
+                                <button @click="removeCategory(category.id)" class="bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-700 transition duration-300">Remove</button>
                             </li>
                         </ul>
                     </div>
@@ -308,177 +313,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.title {
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.columns {
-    display: flex;
-    justify-content: space-between;
-}
-
-.column {
-    flex: 1;
-    margin-right: 20px;
-}
-
-.column:last-child {
-    margin-right: 0;
-}
-
-.post, .comment {
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.comment {
-    margin-left: 20px;
-}
-
-textarea, input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-    font-size: 14px;
-}
-
-button:hover {
-    background-color: #4b5563;
-}
-
-.back-button-container {
-    text-align: right;
-}
-
-.back-button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.back-button:hover {
-    background-color: #4b5563;
-}
-
-.delete-button {
-    background-color: #e3342f;
-}
-
-.delete-button:hover {
-    background-color: #cc1f1a;
-}
-
-.save-button {
-    background-color: #38c172;
-}
-
-.save-button:hover {
-    background-color: #2fa360;
-}
-
-.edit-button {
-    background-color: #ffed4a;
-    color: #1f2937;
-    margin-left: 30px;
-}
-
-.edit-button:hover {
-    background-color: #fce96a;
-}
-
-.blog_post_categories {
-    padding: 30px 0 10px;
-}
-
-.blog-post_delete-button{
-    margin: 0 0 30px 0;
-}
-
-.button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #4b5563;
-}
-
-.blog-post_categories {
-    margin: 20px 0 30px 0;
-}
-
-.blog-post_create-post-btn {
-    margin-bottom: 30px;
-}
-
-.blog-post_selected_category {
-    margin-top: 10px;
-}
-
-.blog-post_selected_category_delete_btn {
-    margin-left: 30px;
-}
-
-.search-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 30px;
-    width: 100%;
-    padding: 10px;
-}
-
-.search-input {
-    width: 100%;
-    max-width: 600px;
-    padding: 10px 20px;
-    border: 2px solid #ccc;
-    border-radius: 25px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-input:focus {
-    border-color: #007BFF;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-
-</style>
