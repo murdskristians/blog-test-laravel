@@ -1,28 +1,30 @@
 <template>
-    <div class="container">
-        <div class="header">
-            <h1 class="title">Categories</h1>
-            <button class="back-button" @click="goBack">Back to Dashboard</button>
-            <a data-v-8e8f4dea="" class="button" href="/blog_posts">Blog Posts</a>
+    <div class="max-w-3xl mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Categories</h1>
+            <div>
+                <button class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300 mr-2" @click="goBack">Back to Dashboard</button>
+                <a class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300" href="/blog_posts">Blog Posts</a>
+            </div>
         </div>
-        <div class="categories-grid">
-            <ul class="category-list">
-                <li v-for="category in categories" :key="category.id" class="category-item">
-                    <div class="category-name">
+        <div class="grid gap-6 md:grid-cols-2">
+            <ul class="space-y-4">
+                <li v-for="category in categories" :key="category.id" class="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
+                    <div class="flex-1">
                         <span v-if="editingCategoryId !== category.id">{{ category.name }}</span>
-                        <input v-else v-model="editingCategoryName" class="input" />
+                        <input v-else v-model="editingCategoryName" class="w-full p-2 border rounded-lg" />
                     </div>
-                    <div class="category-actions">
-                        <button v-if="editingCategoryId !== category.id" @click="startEditing(category)" class="button">Edit</button>
-                        <button v-else @click="updateCategory(category.id)" class="button">Save</button>
-                        <button @click="deleteCategory(category.id)" class="button delete-button">Delete</button>
+                    <div class="flex space-x-2">
+                        <button v-if="editingCategoryId !== category.id" @click="startEditing(category)" class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">Edit</button>
+                        <button v-else @click="updateCategory(category.id)" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">Save</button>
+                        <button @click="deleteCategory(category.id)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Delete</button>
                     </div>
                 </li>
             </ul>
-            <div class="category-form-container">
-                <form @submit.prevent="createCategory" class="category-form">
-                    <input v-model="newCategory.name" placeholder="Category Name" class="input" />
-                    <button type="submit" class="button">Create Category</button>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <form @submit.prevent="createCategory" class="space-y-4">
+                    <input v-model="newCategory.name" placeholder="Category Name" class="w-full p-2 border rounded-lg" />
+                    <button type="submit" class="bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300 w-full">Create Category</button>
                 </form>
             </div>
         </div>
@@ -89,117 +91,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.title {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.category-list {
-    list-style-type: none;
-    padding: 0;
-}
-
-.category-item {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.category-item:last-child {
-    border-bottom: none;
-}
-
-.category-name {
-    flex: 1;
-}
-
-.category-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.category-form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.category-form {
-    width: 100%;
-}
-
-.input {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #4b5563;
-}
-
-.delete-button {
-    background-color: #dc2626;
-    color: #ffffff;
-}
-
-.delete-button:hover {
-    background-color: #b91c1c;
-}
-
-.back-button {
-    background-color: #1f2937;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.back-button:hover {
-    background-color: #4b5563;
-}
-</style>
